@@ -1,10 +1,22 @@
 import GSAP from 'gsap'
 import { PerspectiveCamera, WebGLRenderer, Scene, Clock } from 'three'
 
+import * as THREE from 'three'
+
 import { Pane } from 'tweakpane'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-import PostProcessPipeline from './class/PostProcessPipeline'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
+
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+
+import { HoloEffect } from './class/HoloEffect'
+
+// import PostProcessPipeline from './class/PostProcessPipeline'
 
 import Home from './Home'
 
@@ -38,13 +50,14 @@ export default class Canvas {
 
     this.createCamera()
 
-    this.createPane()
-
     this.createControls()
 
     this.createClock()
 
-    this.createPostProcessPipeline()
+    // this.createPostProcessPipeline()
+    this.createPostProcess()
+
+    this.createPane()
 
     this.onResize(this.device)
   }
@@ -55,9 +68,11 @@ export default class Canvas {
       antialias: true
     })
 
-    this.renderer.setClearColor(0x000000, 0)
+    this.renderer.setClearColor(0x050505, 1)
 
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1))
+
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping
 
     this.renderer.setSize(window.innerWidth, window.innerHeight)
 
@@ -76,21 +91,85 @@ export default class Canvas {
 
     this.camera = new PerspectiveCamera(fov, aspect, near, far)
 
-    this.camera.position.z = 5
+    this.camera.position.set(-1.5, 1.5, 5)
+  }
+
+  createEnvironment() {
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer)
+
+    this.pmremGenerator.compileEquirectangularShader()
+
+    this.generatedEnvMap = this.pmremGenerator.fromEquirectangular(
+      window.ENV_TEXTURE
+    )
+
+    window.ENV_MAP = this.generatedEnvMap.texture
+
+    this.scene.envitonment = window.ENV_MAP
+
+    this.pmremGenerator.dispose()
   }
 
   createPane() {
     this.pane = new Pane()
 
     this.PARAMS = {
-      alpha: 1
+      exposure: 1,
+      threshold: 0.5,
+      bloomStrength: 1.5,
+      bloomRadius: 0.4,
+      progress: 0
     }
 
-    this.pane.addBinding(this.PARAMS, 'alpha', {
-      min: 0,
-      max: 1,
-      step: 0.01
-    })
+    this.pane
+      .addBinding(this.PARAMS, 'exposure', {
+        min: 0,
+        max: 3,
+        step: 0.01
+      })
+      .on('change', value => {
+        this.renderer.toneMappingExposure = value.value
+      })
+
+    this.pane
+      .addBinding(this.PARAMS, 'threshold', {
+        min: 0,
+        max: 1,
+        step: 0.01
+      })
+      .on('change', value => {
+        this.bloomPass.threshold = value.value
+      })
+
+    this.pane
+      .addBinding(this.PARAMS, 'bloomStrength', {
+        min: 0,
+        max: 3,
+        step: 0.01
+      })
+      .on('change', value => {
+        this.bloomPass.strength = value.value
+      })
+
+    this.pane
+      .addBinding(this.PARAMS, 'bloomRadius', {
+        min: 0,
+        max: 1,
+        step: 0.01
+      })
+      .on('change', value => {
+        this.bloomPass.radius = value.value
+      })
+
+    // this.pane
+    //   .addBinding(this.PARAMS, 'progress', {
+    //     min: 0,
+    //     max: 1,
+    //     step: 0.01
+    //   })
+    //   .on('change', value => {
+    //     this.holoEffect.uniforms.uProgress.value = value.value
+    //   })
   }
 
   createControls() {
@@ -99,6 +178,43 @@ export default class Canvas {
 
   createClock() {
     this.clock = new Clock()
+  }
+
+  /**
+   * postprocess
+   */
+
+  // createPostProcessPipeline() {
+  //   this.postProcessPipeline = new PostProcessPipeline({
+  //     renderer: this.renderer,
+  //     scene: this.scene,
+  //     camera: this.camera
+  //   })
+
+  //   this.postProcessPipeline.createPasses()
+
+  //   this.postProcessPipeline.createPostProcess()
+  // }
+
+  createPostProcess() {
+    this.renderScene = new RenderPass(this.scene, this.camera)
+
+    this.bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.5,
+      0.5,
+      0.08
+    )
+
+    this.holoEffect = new ShaderPass(HoloEffect)
+
+    this.composer = new EffectComposer(this.renderer)
+
+    this.composer.addPass(this.renderScene)
+
+    this.composer.addPass(this.bloomPass)
+
+    this.composer.addPass(this.holoEffect)
   }
 
   /**home */
@@ -119,6 +235,8 @@ export default class Canvas {
    */
 
   onPreloaded() {
+    this.createEnvironment()
+
     this.onChangeEnd(this.template)
   }
 
@@ -140,6 +258,8 @@ export default class Canvas {
 
   onResize(device) {
     this.renderer.setSize(window.innerWidth, window.innerHeight)
+
+    this.composer.setSize(window.innerWidth, window.innerHeight)
 
     const aspect = window.innerWidth / window.innerHeight
 
@@ -279,21 +399,6 @@ export default class Canvas {
     }
   }
 
-  /**
-   * postprocess
-   */
-  createPostProcessPipeline() {
-    this.postProcessPipeline = new PostProcessPipeline({
-      renderer: this.renderer,
-      scene: this.scene,
-      camera: this.camera
-    })
-
-    this.postProcessPipeline.createPasses()
-
-    this.postProcessPipeline.createPostProcess()
-  }
-
   /**loop */
 
   update(scroll) {
@@ -302,7 +407,6 @@ export default class Canvas {
         scroll: scroll,
         time: this.time
       })
-      this.home.setParameter(this.PARAMS)
     }
 
     this.time.delta = this.clock.getDelta()
@@ -311,6 +415,9 @@ export default class Canvas {
 
     this.time.current += this.time.delta
 
-    this.postProcessPipeline.render()
+    this.holoEffect.uniforms.uTime.value = this.time.current
+
+    // this.renderer.render(this.scene, this.camera)
+    this.composer.render(this.scene, this.camera)
   }
 }

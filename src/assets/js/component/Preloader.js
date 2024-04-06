@@ -2,6 +2,12 @@ import Component from '@js/class/Component'
 import each from 'lodash/each'
 import GSAP from 'gsap'
 import { TextureLoader } from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
+
+const modelPass = '/model/human.glb'
+// const env = '/textures/environment-map.jpg'
+const env = '/textures/hologram-map.webp'
 
 export default class Preloader extends Component {
   constructor() {
@@ -28,28 +34,72 @@ export default class Preloader extends Component {
 
     this.textureLoader = new TextureLoader()
 
-    this.assets.forEach(imageDom => {
-      const image = new Image()
+    this.dracoLoader = new DRACOLoader()
 
-      const id = imageDom.getAttribute('data-id')
+    this.dracoLoader.setDecoderPath('/draco/')
 
-      image.crossOrigin = 'anonymous'
+    this.gltfLoader = new GLTFLoader()
 
-      image.src = imageDom.getAttribute('data-src')
+    this.gltfLoader.setDRACOLoader(this.dracoLoader)
 
-      image.onload = () => {
-        const texture = this.textureLoader.load(image.src)
+    const modelPromise = new Promise((resolve, reject) => {
+      this.gltfLoader.load(
+        modelPass,
+        model => {
+          window.DRACO_MODEL = model
+          resolve()
+        },
+        undefined,
+        error => {
+          reject(error)
+        }
+      )
+    })
 
-        texture.needsUpdate = true
+    const envPromise = new Promise((resolve, reject) => {
+      this.textureLoader.load(
+        env,
+        texture => {
+          window.ENV_TEXTURE = texture
+          resolve()
+        },
+        undefined,
+        error => {
+          reject(error)
+        }
+      )
+    })
 
-        window.TEXTURES[id] = texture
+    const imagePromises = this.assets.map(imageDOM => {
+      return new Promise((resolve, reject) => {
+        const image = new Image()
 
-        this.onAssetLoaded()
-      }
+        const id = imageDOM.getAttribute('data-id')
 
-      image.onerror = error => {
-        console.error('An error happened while loading a texture', error)
-      }
+        image.crossOrigin = 'anonymous'
+
+        image.src = imageDOM.getAttribute('data-src')
+
+        image.onload = () => {
+          const texture = this.textureLoader.load(image.src)
+
+          texture.needsUpdate = true
+
+          window.TEXTURES[id] = texture
+
+          this.onAssetLoaded()
+
+          resolve()
+        }
+
+        image.onerror = error => {
+          reject(error)
+        }
+      })
+    })
+
+    Promise.all([modelPromise, ...imagePromises, envPromise]).then(() => {
+      this.onLoaded()
     })
   }
 
@@ -60,9 +110,9 @@ export default class Preloader extends Component {
 
     this.elements.text.innerHTML = `${Math.round(percent * 100)}%`
 
-    if (this.length === this.totalAssetsLength) {
-      this.onLoaded()
-    }
+    // if (this.length === this.totalAssetsLength) {
+    //   this.onLoaded()
+    // }
   }
 
   onLoaded() {

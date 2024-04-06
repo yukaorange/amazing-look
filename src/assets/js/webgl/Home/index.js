@@ -1,11 +1,9 @@
 import map from 'lodash/map'
 import GSAP from 'gsap'
 
-import { PlaneGeometry } from 'three'
-
 import * as THREE from 'three'
 
-import Plane from './Plane'
+import Human from './human'
 
 export default class Home {
   constructor({ scene, sizes, device }) {
@@ -44,11 +42,9 @@ export default class Home {
       lerp: 0.1
     }
 
-    this.createGeometry()
+    this.createHuman()
 
-    this.createPlane()
-
-    this.scene.add(this.plane.mesh)
+    this.scene.add(this.human.modelScene)
 
     this.onResize({
       sizes: this.sizes,
@@ -58,13 +54,8 @@ export default class Home {
     this.show()
   }
 
-  createGeometry() {
-    this.geometry = new PlaneGeometry(1, 1, 100, 100)
-  }
-
-  createPlane() {
-    this.plane = new Plane({
-      geometry: this.geometry,
+  createHuman() {
+    this.human = new Human({
       sizes: this.sizes,
       device: this.device
     })
@@ -75,19 +66,19 @@ export default class Home {
    */
 
   show() {
-    this.plane.show()
+    this.human.show()
   }
 
   hide() {
-    this.plane.hide()
+    this.human.hide()
   }
 
   /**
    * events
    */
   onResize(values) {
-    if (this.plane) {
-      this.plane.onResize(values)
+    if (this.human) {
+      this.human.onResize(values)
     }
   }
 
@@ -118,22 +109,18 @@ export default class Home {
    * update
    */
   update({ scroll, time }) {
-    if (!this.plane) return
+    if (!this.human) return
 
-    this.plane.update({
+    this.human.update({
       scroll: scroll,
       time: time
     })
-  }
-
-  setParameter(params) {
-    this.plane.setParameter(params)
   }
 
   /**
    * destroy
    */
   destroy() {
-    this.scene.remove(this.plane.mesh)
+    this.scene.remove(this.human.mesh)
   }
 }

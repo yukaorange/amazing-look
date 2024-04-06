@@ -311,7 +311,9 @@ class App {
       this.canvas.update(this.page.scroll)
     }
 
-    this.frame = window.requestAnimationFrame(this.update.bind(this))
+    this.frame = window.requestAnimationFrame(() => {
+      this.update()
+    })
   }
 }
 
