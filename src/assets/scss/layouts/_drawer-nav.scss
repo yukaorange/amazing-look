@@ -3,6 +3,27 @@
   display: none;
 }
 
+
 .drawer-nav.active {
   display: block;
+  background-color: #f8f8f8;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+
+.drawer-nav__inner {
+  display: grid;
+  row-gap: 1.6rem;
+}
+.drawer-nav__list {
+  display: grid;
+  row-gap: 1.6rem;
+  justify-items: center;
+}
+.drawer-nav__list__item {
+}
+.drawer-nav__list__item__link {
+}
+.drawer-nav__close {
 }

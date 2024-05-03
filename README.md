@@ -1,8 +1,6 @@
 # About
 
-MSDF フォントの使用の挑戦した。
-
-I tried to use MSDF Font texture.
+I learn about hologram effect.
 
 [msdf](https://github.com/leochocolat/three-msdf-text-utils)
 
@@ -12,7 +10,5 @@ https://mdsf-text.vercel.app/
 
 # References
 
-- [noise](https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83)
-- [dotPass](https://threejs.org/examples/?q=postpr#webgl_postprocessing)
-- [rotate](https://gist.github.com/yiwenl/3f804e80d0930e34a0b33359259b556c)
-- [msdf](https://github.com/leochocolat/three-msdf-text-utils)
+- [hologram](https://www.youtube.com/watch?v=duSe4UJsn3Y)
+- [noise](https://hub.jmonkeyengine.org/t/glsl-hologram-shader/40086)

@@ -5,7 +5,7 @@ import { TextureLoader } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 
-const modelPass = '/model/human.glb'
+const modelPass = '/model/hand-bone.glb'
 // const env = '/textures/environment-map.jpg'
 const env = '/textures/hologram-map.webp'
 

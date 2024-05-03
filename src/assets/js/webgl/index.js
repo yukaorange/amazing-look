@@ -70,7 +70,7 @@ export default class Canvas {
 
     this.renderer.setClearColor(0x050505, 1)
 
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1))
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
 
@@ -170,6 +170,8 @@ export default class Canvas {
     //   .on('change', value => {
     //     this.holoEffect.uniforms.uProgress.value = value.value
     //   })
+
+    this.pane.containerElem_.style.display = 'none'
   }
 
   createControls() {

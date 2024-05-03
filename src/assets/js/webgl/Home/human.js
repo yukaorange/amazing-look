@@ -65,23 +65,23 @@ export default class Human {
         /* glsl */ `
         #ifdef USE_ENVMAP
 
-        vec3 getIBLIrradiance( const in vec3 normal ) {
+          vec3 getIBLIrradiance( const in vec3 normal ) {
 
         #ifdef ENVMAP_TYPE_CUBE_UV
 
-			vec3 worldNormal = inverseTransformDirection( normal, viewMatrix );
+          vec3 worldNormal = inverseTransformDirection( normal, viewMatrix );
 
-			vec4 envMapColor = textureCubeUV( envMap, worldNormal, 1.0 );
+          vec4 envMapColor = textureCubeUV( envMap, worldNormal, 1.0 );
 
-			return PI * envMapColor.rgb * envMapIntensity;
+          return PI * envMapColor.rgb * envMapIntensity;
 
-      #else
+        #else
 
-			return vec3( 0.0 );
+          return vec3( 0.0 );
 
-      #endif
+        #endif
 
-      }
+        }
 
         vec3 getIBLRadiance( const in vec3 viewDir, const in vec3 normal, const in float roughness ) {
 
@@ -154,13 +154,13 @@ export default class Human {
       scale = 0.175 * normalize
     }
 
-    this.model.scale.set(scale, scale, scale)
-
     this.model.position.set(0, 0, 0)
 
     this.model.geometry.center()
 
-    this.model.rotation.set(0, 0, 0)
+    this.model.rotation.x = Math.PI * (3 / 2)
+
+    this.model.scale.set(scale, scale, scale)
   }
 
   calculateBounds({ sizes, device }) {
