@@ -2,11 +2,12 @@
 
 I learn about hologram effect.
 
-[msdf](https://github.com/leochocolat/three-msdf-text-utils)
+[hologram](https://www.youtube.com/watch?app=desktop&v=KGGB5LFEejg)
 
-https://mdsf-text.vercel.app/
+https://amazing-look.vercel.app/
 
-![image](https://github.com/yukaorange/mdsf-text/assets/98954503/eff05604-f138-4772-9a20-1e2b8df37584)
+![image](https://github.com/yukaorange/amazing-look/assets/98954503/bce758b6-e829-4827-a7f5-b385df53ef04)
+
 
 # References
 
