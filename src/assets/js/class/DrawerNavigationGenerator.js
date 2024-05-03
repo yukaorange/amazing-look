@@ -25,10 +25,10 @@ export default class DrawerNavigationGenerator {
   init() {
     this.setupDrawerToggleButton()
     this.setupNavButtonActions()
-    this.setupCloseOutsideClick()
-    this.preventInnerPropagation()
+    // this.setupCloseOutsideClick()
+    // this.preventInnerPropagation()
     this.setupCloseButtonClick()
-    this.setupButtonTextToggle()
+    // this.setupButtonTextToggle()
   }
 
   setupDrawerToggleButton() {
